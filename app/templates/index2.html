@@ -1,0 +1,40 @@
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>thermo</title>
+  <link type="text/css" href="/static/css/styles.css" rel="stylesheet">
+  <!-- ios support -->
+  <link rel="apple-touch-icon" href="/static/img/icons/icon-96x96.png">
+  <meta name="apple-mobile-web-app-status-bar" content="#FFE1C4">
+</head>
+<body class="grey lighten-4">
+  <canvas id="line-chart" width="800" height="450"></canvas>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+<script>
+  //https://www.chartjs.org/docs/latest/developers/updates.html
+  new Chart(document.getElementById("line-chart"), {
+  type: 'line',
+  data: {
+    labels: [1500,1600,1700,1750,1800,1850,1900,1950,1999,2050],
+    datasets: [{ 
+        data: [86,114,106,106,107,111,133,221,783,2478],
+        label: "Temperature",
+        borderColor: "#3e95cd",
+        fill: false
+      }
+    ]
+  },
+  options: {
+    title: {
+      display: true,
+      text: 'Climate'
+    }
+  }
+});
+</script>
+
+  <script src="/static/js/ui.js"></script>
+</body>
+</html>
