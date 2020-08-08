@@ -1,7 +1,7 @@
 const dbconnect = window.indexedDB.open('temps', 1);
 var db = null
 
-const interval = setInterval(writeTo, 5000);
+const interval = setInterval(writeTo, 2000);
 
 
 dbconnect.onupgradeneeded = ev => {
@@ -53,15 +53,15 @@ function writeTo(){
   getJSON("/stats",
     function (error, data) {
       let date = new Date()
-      let time = date.getTime()
+      let time = date.toLocaleString()
       let writeData = [
-        {timestamp: time, temp: data["temperature"]}
+        {timestamp: time, temperature: data["temperature"]}
       ];
 
       write("Temperatures", writeData)
 
       writeData = [
-        {timestamp: time, temp: data["humidity"]}
+        {timestamp: time, humidity: data["humidity"]}
       ];
 
       write("Humidities", writeData)
@@ -70,6 +70,15 @@ function writeTo(){
         console.log("Error while getting temps")
     }
   );
+
+    drawChart()
+
+}
+
+function drawChart(){
+
+  let humiditiesDict =  readLast("Humidities", 1)
+  let temperaturesDict =  readLast("Temperatures", 1)
 
 }
 
@@ -89,18 +98,68 @@ function getJSON(url, callback, fallback) {
   xhr.send();
 };
 
+  //https://www.chartjs.org/docs/latest/developers/updates.html
+  var chart1 = new Chart(document.getElementById("line-chart"), {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [{ 
+          data: [],
+          label: "Humidity",
+          borderColor: "blue",
+          fill: false
+        },
+        { 
+          data: [],
+          label: "Temperature",
+          borderColor: "red",
+          fill: false
+        }
+      ]
+    },
+    options: {
+      title: {
+        display: true,
+        text: 'Climate'
+      }
+    }
+  });
 
-function readLast(n){
-  let objectStore = db.transaction("Temperatures").objectStore("Temperatures");
+function readLast(type, n){
+  let objectStore = db.transaction(type).objectStore(type);
   let data = [];
+
 
   objectStore.openCursor(null, "prev").onsuccess = function(event) {
     var cursor = event.target.result;
     if (cursor && data.length < n) {
-      //console.log(cursor.value);
-      data.push(cursor.value)
-      cursor.continue();
+      try {
+        data.push(cursor.value)
+        
+        
+        
+        //chart1.data.labels = chart1.data.labels.slice(-n)
+        
+        if (cursor.value["humidity"] != null){
+          //chart1.data.datasets[0].data.shift()
+          chart1.data.datasets[0].data.push(cursor.value["humidity"])
+          //chart1.data.labels.shift()
+          chart1.data.labels.push(cursor.value["timestamp"])
+        }
+        if(cursor.value["temperature"] != null){
+          //chart1.data.datasets[1].data.shift()
+          chart1.data.datasets[1].data.push(cursor.value["temperature"])
+        }
+        
+        chart1.update()
+        cursor.continue();
+      } catch (error) {
+        console.log(error)
+      }
+
     }
   };
+
+
   return data
 }
