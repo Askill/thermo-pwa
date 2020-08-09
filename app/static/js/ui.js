@@ -1,7 +1,7 @@
 const dbconnect = window.indexedDB.open('temps', 1);
 var db = null
-
-const interval = setInterval(writeTo, 2000);
+var n = 50
+const interval = setInterval(writeTo, 3000);
 
 
 dbconnect.onupgradeneeded = ev => {
@@ -77,9 +77,27 @@ function writeTo(){
 
 function drawChart(){
 
-  let humiditiesDict =  readLast("Humidities", 1)
-  let temperaturesDict =  readLast("Temperatures", 1)
+  
 
+  chart1.data.datasets[0].data = chart1.data.datasets[0].data.slice(-n)
+  chart1.data.datasets[1].data = chart1.data.datasets[1].data.slice(-n)
+  chart1.data.labels = chart1.data.labels.slice(-n)
+
+
+  readLast("Humidities", n, function(data){
+    data.reverse().forEach(function(item){
+      chart1.data.datasets[0].data.push(item["humidity"])
+      chart1.data.labels.push(item["timestamp"]) 
+    })
+
+  })
+  readLast("Temperatures", n, function(data){
+    data.reverse().forEach(function(item){
+      chart1.data.datasets[1].data.push(item["temperature"])
+    })
+  })
+
+  chart1.update()
 }
 
 // TODO: replace with fetch
@@ -118,6 +136,9 @@ function getJSON(url, callback, fallback) {
       ]
     },
     options: {
+      responsive: false,
+      width:1000,
+      height:800,
       title: {
         display: true,
         text: 'Climate'
@@ -125,41 +146,24 @@ function getJSON(url, callback, fallback) {
     }
   });
 
-function readLast(type, n){
+function readLast(type, n, callback){
   let objectStore = db.transaction(type).objectStore(type);
   let data = [];
-
 
   objectStore.openCursor(null, "prev").onsuccess = function(event) {
     var cursor = event.target.result;
     if (cursor && data.length < n) {
       try {
         data.push(cursor.value)
-        
-        
-        
-        //chart1.data.labels = chart1.data.labels.slice(-n)
-        
-        if (cursor.value["humidity"] != null){
-          //chart1.data.datasets[0].data.shift()
-          chart1.data.datasets[0].data.push(cursor.value["humidity"])
-          //chart1.data.labels.shift()
-          chart1.data.labels.push(cursor.value["timestamp"])
-        }
-        if(cursor.value["temperature"] != null){
-          //chart1.data.datasets[1].data.shift()
-          chart1.data.datasets[1].data.push(cursor.value["temperature"])
-        }
-        
-        chart1.update()
+
         cursor.continue();
       } catch (error) {
         console.log(error)
       }
-
+    }
+    else{
+      callback(data)
     }
   };
 
-
-  return data
 }

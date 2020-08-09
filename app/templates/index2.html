@@ -10,31 +10,9 @@
   <meta name="apple-mobile-web-app-status-bar" content="#FFE1C4">
 </head>
 <body class="grey lighten-4">
-  <canvas id="line-chart" width="800" height="450"></canvas>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
-<script>
-  //https://www.chartjs.org/docs/latest/developers/updates.html
-  var chart1 = new Chart(document.getElementById("line-chart"), {
-  type: 'line',
-  data: {
-    labels: [1500,1600,1700,1750,1800,1850,1900,1950,1999,2050],
-    datasets: [{ 
-        data: [86,114,106,106,107,111,133,221,783,2478],
-        label: "Temperature",
-        borderColor: "#3e95cd",
-        fill: false
-      }
-    ]
-  },
-  options: {
-    title: {
-      display: true,
-      text: 'Climate'
-    }
-  }
-});
-</script>
 
+  <canvas id="line-chart" style="width: 512px; height: 500px"></canvas>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
   <script src="/static/js/ui.js"></script>
 </body>
 </html>
